@@ -1,0 +1,88 @@
+---
+# GitLab CI/CD Pipeline for Traefik Deployment to EKS
+stages:
+  - validate
+  - deploy
+
+variables:
+  # AWS Configuration - Set these in GitLab CI/CD Variables
+  AWS_REGION: ${AWS_REGION}
+  EKS_CLUSTER_NAME: ${EKS_CLUSTER_NAME}
+  AWS_SUBNET_IDS: ${AWS_SUBNET_IDS}  # Comma-separated list of subnet IDs
+  
+  # Helm Configuration
+  HELM_RELEASE_NAME: traefik
+  HELM_NAMESPACE: traefik
+  HELM_TIMEOUT: 5m
+
+# Common before_script for AWS Authentication
+.aws_auth: &aws_auth
+  before_script:
+    - echo "Authenticating with AWS..."
+    - aws --version
+    - aws configure set region $AWS_REGION
+    # Get EKS cluster kubeconfig
+    - echo "Getting kubeconfig for cluster $EKS_CLUSTER_NAME..."
+    - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+# Validate Helm Chart and Values
+validate:
+  stage: validate
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  <<: *aws_auth
+  script:
+    - echo "Installing Helm..."
+    - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+    - echo "Validating Chart.yaml and values.yaml..."
+    - helm lint .
+    - echo "Validating Kubernetes resources that would be created..."
+    - helm dependency update .
+    - helm template traefik . --values values.yaml
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# Deploy Traefik to EKS
+deploy_traefik:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  <<: *aws_auth
+  script:
+    - echo "Installing Helm..."
+    - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+    - echo "Creating namespace if it doesn't exist..."
+    - kubectl create namespace $HELM_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+    - echo "Updating Helm dependencies..."
+    - helm dependency update .
+    - echo "Deploying Traefik to EKS..."
+    - |
+      helm upgrade --install $HELM_RELEASE_NAME . \
+        --namespace $HELM_NAMESPACE \
+        --values values.yaml \
+        --set "traefik.service.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-subnets=${AWS_SUBNET_IDS}" \
+        --wait \
+        --timeout $HELM_TIMEOUT \
+        --debug
+    - echo "Verifying deployment..."
+    - kubectl get pods -n $HELM_NAMESPACE
+    - kubectl get svc -n $HELM_NAMESPACE
+    - echo "Traefik deployment completed."
+  rules:
+    # Only deploy from main branch
+    - if: $CI_COMMIT_BRANCH == "main"
+  environment:
+    name: production
+    url: https://${TRAEFIK_DASHBOARD_URL}  # Replace with actual dashboard URL if available
+
+# Create separate jobs for different environments if needed
+# Example: Staging environment
+deploy_traefik_staging:
+  extends: deploy_traefik
+  variables:
+    HELM_RELEASE_NAME: traefik-staging
+    HELM_NAMESPACE: traefik-staging
+  rules:
+    - if: $CI_COMMIT_BRANCH == "staging"
+  environment:
+    name: staging
+    url: https://${TRAEFIK_STAGING_DASHBOARD_URL}
