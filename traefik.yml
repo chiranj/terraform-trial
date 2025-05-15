@@ -22,16 +22,19 @@ traefik:
       port: 8000
       exposedPort: 80
       protocol: TCP
+      nodePort: 30080  # Hard-coded NodePort for HTTP
     websecure:
       port: 8443
       exposedPort: 443
       protocol: TCP
+      nodePort: 30443  # Hard-coded NodePort for HTTPS
       tls:
         enabled: true  # SSL termination at Traefik level
     metrics:
       port: 9100
       exposedPort: 9100
       protocol: TCP
+      nodePort: 30090  # Hard-coded NodePort for metrics
 
   # Configure Service - NLB with client IP preservation
   service:
