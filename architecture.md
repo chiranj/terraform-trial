@@ -26,7 +26,7 @@ flowchart TD
     C -->|Enable/Disable| E[Add-ons selection]
     E -->|Example options| F[traefik=true, external-dns=true, prometheus=false]
     
-    B -->|3. Commit & Push| G[Trigger GitLab Pipeline]
+    C -->|3. Commit & Push| G[Trigger GitLab Pipeline]
     G -->|Runs on user's| H[EC2 GitLab Runners in user AWS account]
     H -->|4. Import| I[Main Pipeline Templates Repository]
     
