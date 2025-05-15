@@ -105,3 +105,36 @@ deploy_traefik_staging:
 
 
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+
+$ helm upgrade --install $HELM_RELEASE_NAME . \ # collapsed multi-line command
+history.go:56: 2025-05-15 18:45:22.566295631 +0000 UTC m=+1.969837968 [debug] getting history for release traefik
+install.go:225: 2025-05-15 18:45:22.575000549 +0000 UTC m=+1.978542877 [debug] Original chart version: ""
+Release "traefik" does not exist. Installing it now.
+install.go:242: 2025-05-15 18:45:22.575183907 +0000 UTC m=+1.978726245 [debug] CHART PATH: /builds/gitlab/psb/containers/eks-backend
+client.go:142: 2025-05-15 18:45:22.703215466 +0000 UTC m=+2.106757838 [debug] creating 1 resource(s)
+wait.go:50: 2025-05-15 18:45:22.737487128 +0000 UTC m=+2.141029455 [debug] beginning wait for 0 resources with timeout of 5m0s
+NAME: traefik
+LAST DEPLOYED: Thu May 15 18:45:22 2025
+NAMESPACE: traefik
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+
+$ helm upgrade --install $HELM_RELEASE_NAME . \ # collapsed multi-line command
+history.go:56: 2025-05-15 22:39:29.347095418 +0000 UTC m=+2.062766740 [debug] getting history for release traefik
+upgrade.go:164: 2025-05-15 22:39:29.376186104 +0000 UTC m=+2.091857426 [debug] preparing upgrade for traefik
+upgrade.go:172: 2025-05-15 22:39:29.424884896 +0000 UTC m=+2.140556243 [debug] performing update for traefik
+upgrade.go:375: 2025-05-15 22:39:29.428658723 +0000 UTC m=+2.144330111 [debug] creating upgraded release for traefik
+client.go:393: 2025-05-15 22:39:29.460077777 +0000 UTC m=+2.175749101 [debug] checking 0 resources for changes
+upgrade.go:447: 2025-05-15 22:39:29.460157483 +0000 UTC m=+2.175828797 [debug] waiting for release traefik resources (created: 0 updated: 0  deleted: 0)
+wait.go:50: 2025-05-15 22:39:29.460170866 +0000 UTC m=+2.175842225 [debug] beginning wait for 0 resources with timeout of 5m0s
+upgrade.go:180: 2025-05-15 22:39:29.477583636 +0000 UTC m=+2.193254958 [debug] updating status for upgraded release for traefik
+Release "traefik" has been upgraded. Happy Helming!
+NAME: traefik
+LAST DEPLOYED: Thu May 15 22:39:29 2025
+NAMESPACE: traefik
+STATUS: deployed
+REVISION: 3
+TEST SUITE: None
