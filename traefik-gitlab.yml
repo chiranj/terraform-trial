@@ -18,12 +18,28 @@ variables:
 # Common before_script for AWS Authentication
 .aws_auth: &aws_auth
   before_script:
+    - echo "Installing kubectl..."
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+    - kubectl version --client
+
+    # Install jq (needed for JSON processing)
+    - apt-get update && apt-get install -y jq
+
+    
     - echo "Authenticating with AWS..."
     - aws --version
     - aws configure set region $AWS_REGION
     # Get EKS cluster kubeconfig
     - echo "Getting kubeconfig for cluster $EKS_CLUSTER_NAME..."
     - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+    - echo "Updating kubeconfig with token authentication..."
+    - aws eks get-token --cluster-name $EKS_CLUSTER_NAME --region $AWS_REGION > /tmp/aws-token.json
+    - export TOKEN=$(cat /tmp/aws-token.json | jq -r '.status.token')
+    - kubectl config set-credentials aws --token=$TOKEN
+    - kubectl config set-context --current --user=aws
 
 # Validate Helm Chart and Values
 validate:
