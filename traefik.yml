@@ -41,18 +41,19 @@ traefik:
     enabled: true
     type: LoadBalancer
     annotations:
-      # NLB type specification
-      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      # AWS Load Balancer Controller specific annotations
+      service.beta.kubernetes.io/aws-load-balancer-type: "external"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       
-      # Client IP preservation - IMPORTANT
+      # Cross-zone load balancing (recommended)
+      service.beta.kubernetes.io/aws-load-balancer-attributes: "load_balancing.cross_zone.enabled=true"
+      
+      # Client IP preservation (with AWS Load Balancer Controller)
       service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
       
-      # Header forwarding configurations
-      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+      # If you need proxy protocol with AWS Load Balancer Controller
       service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
-      
-      # Extra: cross-zone load balancing for high availability (recommended)
-      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
 
   # Configure Traefik Dashboard
   ingressRoute:
