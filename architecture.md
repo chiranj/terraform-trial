@@ -39,8 +39,8 @@ flowchart TD
     M -->|Pass parameters| N
     N -->|Import| O[Add-ons .gitlab-ci.yml]
     O -->|Install selected| P[Helm charts for enabled add-ons]
-    P -->|Configure with| Q[Environment variables]
-    Q -->|Examples| R[Cluster name, IRSA ARN, Region]
+    P -->|Configure with| Q[Environment variables (Cluster name, IRSA ARN, Region)]
+    Q -->|Deploy Add-ons| R[external-dns, keda, karpenter, traefik]
 ```
 
 ## Ingress Architecture
