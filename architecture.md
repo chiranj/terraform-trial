@@ -21,7 +21,7 @@ The deployment process is designed to be straightforward for end users while mai
 ```mermaid
 flowchart TD
     A[User] -->|1. Create new repo from template| B[Repository with default .gitlab-ci.yml]
-    A -->|2. Configure| C[Update parameters]
+    B -->|2. Configure| C[Update parameters]
     D[Account ID, Subnets, Cluster name, IAM Role] -->|Set in| C
     E[Add-ons selection] -->|Enable/Disable in| C
     E -->|Example options| F[traefik=true, external-dns=true, prometheus=false]
