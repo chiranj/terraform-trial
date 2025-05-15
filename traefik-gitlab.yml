@@ -102,3 +102,6 @@ deploy_traefik_staging:
   environment:
     name: staging
     url: https://${TRAEFIK_STAGING_DASHBOARD_URL}
+
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
