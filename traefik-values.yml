@@ -1,3 +1,4 @@
+# Enable Traefik CRDs
 traefik:
   enabled: true
 ingressRoute:
@@ -9,63 +10,84 @@ ingressClass:
 middleware:
   enabled: true
 
-
-  globalArguments:
-    - "--global.checknewversion=false"
-    - "--global.sendanonymoususage=false"
-  service:
+# Providers configuration
+providers:
+  kubernetesCRD:
     enabled: true
-    type: LoadBalancer
-    annotations:
-      service.beta.kubernetes.io/aws-load-balancer-name: "traefik-nlb"
-      service.beta.kubernetes.io/aws-load-balancer-type: "external"
-      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
-      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-      service.beta.kubernetes.io/aws-load-balancer-attributes: "load_balancing.cross_zone.enabled=true"
-      service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
-      service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
-  persistence:
-    enabled: false
-  deployment:
+    allowCrossNamespace: true
+  kubernetesIngress:
     enabled: true
-    replicas: 2
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values:
-                      - traefik
-              topologyKey: kubernetes.io/hostname
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-    limits:
-      cpu: "300m"
-      memory: "256Mi"
-  metrics:
-    prometheus:
-      enabled: true
 
-  # Additional Traefik arguments
-  additionalArguments:
-    - "--log.level=INFO"
-    - "--accesslog=true"
-    - "--accesslog.format=json"
-    #  Proxy Protocol when using  NLB 
-    - "--entrypoints.web.proxyprotocol.trustedips=0.0.0.0/0"
-    - "--entrypoints.websecure.proxyprotocol.trustedips=0.0.0.0/0"
+# Global arguments
+globalArguments:
+  - "--global.checknewversion=false"
+  - "--global.sendanonymoususage=false"
 
+# Service configuration
+service:
+  enabled: true
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-name: "traefik-nlb"
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-attributes: "load_balancing.cross_zone.enabled=true"
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+
+# Persistence configuration
+persistence:
+  enabled: false
+
+# Deployment configuration
+deployment:
+  enabled: true
+  replicas: 2
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - traefik
+            topologyKey: kubernetes.io/hostname
+
+# Resources configuration
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "300m"
+    memory: "256Mi"
+
+# Metrics configuration
+metrics:
+  prometheus:
+    enabled: true
+
+# Additional Traefik arguments
+additionalArguments:
+  - "--log.level=INFO"
+  - "--accesslog=true"
+  - "--accesslog.format=json"
+  # Proxy Protocol when using NLB 
+  - "--entrypoints.web.proxyprotocol.trustedips=0.0.0.0/0"
+  - "--entrypoints.websecure.proxyprotocol.trustedips=0.0.0.0/0"
+
+# Dashboard configuration
 ingressRoute:
   dashboard:
     enabled: true
     annotations: {}
     entryPoints: ["web", "websecure"]
+
+# Ports configuration with fixed NodePorts
 ports:
   web:
     port: 8000
@@ -84,6 +106,3 @@ ports:
     exposedPort: 9100
     protocol: TCP
     nodePort: 30090
-
-
-
