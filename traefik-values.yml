@@ -1,12 +1,21 @@
 # Enable Traefik CRDs
 traefik:
   enabled: true
+
+# CRD configuration
 ingressRoute:
-  enabled: true 
+  enabled: true
+  dashboard:
+    enabled: true
+    annotations: {}
+    entryPoints: ["web", "websecure"]
+
 traefikService:
   enabled: true 
+
 ingressClass:
   enabled: true 
+
 middleware:
   enabled: true
 
@@ -27,7 +36,7 @@ globalArguments:
 service:
   enabled: true
   type: LoadBalancer
-  annotations:
+  annotations: 
     service.beta.kubernetes.io/aws-load-balancer-name: "traefik-nlb"
     service.beta.kubernetes.io/aws-load-balancer-type: "external"
     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
@@ -79,13 +88,6 @@ additionalArguments:
   # Proxy Protocol when using NLB 
   - "--entrypoints.web.proxyprotocol.trustedips=0.0.0.0/0"
   - "--entrypoints.websecure.proxyprotocol.trustedips=0.0.0.0/0"
-
-# Dashboard configuration
-ingressRoute:
-  dashboard:
-    enabled: true
-    annotations: {}
-    entryPoints: ["web", "websecure"]
 
 # Ports configuration with fixed NodePorts
 ports:
